@@ -1,9 +1,70 @@
-%%%% let us try to factorize matrix A
+clear all
+%%%% let us try to factorize matrix A = Q_plus Q_minus 
 
 %% Introduce a loop
 k = 1+0.01i;
-step = 0.01;
-xi_ar = [0:step:1.5,1.5 + 1i*(0:step:0.1),1.5 + 0.1i - (1.5:-step:0)];
+step1 = 0.01;
+step2 = 0.0001;
+xi_plus_loop = [0:step1:1.5,1.5 + 1i*(0:step2:0.1),1.5 + 0.1i - (0:step1:1.5), 1i*(0.1:-step2:0)];
+
+xi_whole_loop = [-1.5:step1:1.5,1.5 + 1i*(0:step2:0.1),1.5 + 0.1i - (0:step1:3), -1.5 + 1i*(0.1:-step2:0)] - 0.04i;
+
+xi_whole_loop_fl = xi_whole_loop;
+
+gamma_0 = sqrt(k^2  -  xi_whole_loop_fl(1).^2);
+root3_1a = (xi_whole_loop_fl(1) + 1i*gamma_0)^(2/3);
+root3_1b = (xi_whole_loop_fl(1) - 1i*gamma_0)^(2/3);
+root3_2a = (xi_whole_loop_fl(1) + 1i*gamma_0)^(1/3);
+root3_2b = (xi_whole_loop_fl(1) - 1i*gamma_0)^(1/3);
+
+root3_1 = root3_2a+root3_2b;
+root3_2 = root3_2a+root3_2b;
+% 
+ figure;
+ plot(xi_whole_loop_fl)
+ hold all
+ plot(k,'*')
+ hold all
+ plot(-k,'*')
+
+%%%%  evaluate roots we need
+square_cont = root_cont(1/2,gamma_0,k^2 - xi_whole_loop_fl.^2); 
+%%%% whats below lives on the triple covering of a tube
+covering_function_1 = 1*root_cont(2/3,root3_1a, xi_whole_loop_fl + 1i*square_cont) +...
+0*root_cont(2/3,root3_1b, xi_whole_loop_fl - 1i*square_cont);
+covering_function_2 = root_cont(1/3,root3_2a, xi_whole_loop_fl + 1i*square_cont) +... 
+root_cont(1/3,root3_2b, xi_whole_loop_fl - 1i*square_cont);
 
 figure;
-plot(xi_ar)
+plot(covering_function_1,'*')
+
+covering_function_1(end)/covering_function_1(1)
+
+
+%%%% Build Q_plus matrix, factor of A analytic in upper half_plane
+%% Check that it satisfies bypass problem
+
+M_mat = @(x) [1,1,0;-2/sqrt(3)*x,1/sqrt(3)*x,1;2/sqrt(3)*x,-1/sqrt(3)*x,1].';
+Eig_mat = @(x1,x2) diag([1,x1,x2]);
+
+Q_plus_start = M_mat(gamma_0)*Eig_mat(root3_2,root3_1)*inv(M_mat(gamma_0));
+
+
+Q_plus_end = M_mat(square_cont(end))*Eig_mat(covering_function_2(end),covering_function_1(end))*inv(M_mat(square_cont(end)));
+
+%bypass Matrix
+
+P_matrix = @(x)[0, 1, 1i*x; 1/2, 1/2, -(1i*x/2); -(1/(2i*x)), 1/(2i*x), -(1/2)];
+
+
+%%%%% check that H_plus = P_matrix*H_plus after bypass whole loop
+
+
+Q_plus_end - P_matrix(gamma_0)*Q_plus_start
+
+
+
+
+
+
+
