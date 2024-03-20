@@ -129,4 +129,4 @@ Qplus_end - Qplus_start*P_matrix(gamma_0)
 Qminus_start = A_mat(gamma_0)*inv(Qplus_start);
 Qminus_end =  A_mat(square_cont(end))*inv(Qplus_end);
 
-Qminus_end - Qminus_start % this is A = QplusQminus factorization
+Qminus_end - Qminus_start % this is A = QminusQplus factorization
